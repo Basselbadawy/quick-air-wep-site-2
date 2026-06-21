@@ -1,16 +1,31 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, DEMO_DESTINATIONS, DEMO_PACKAGES } from './data'
 
-import Navbar        from './components/Navbar'
-import Hero          from './components/Hero'
-import StatsBar      from './components/StatsBar'
-import Destinations  from './components/Destinations'
-import Packages      from './components/Packages'
+import Navbar         from './components/Navbar'
+import Hero           from './components/Hero'
+import StatsBar       from './components/StatsBar'
+import Destinations   from './components/Destinations'
+import Packages       from './components/Packages'
 import MatrouhSection from './components/MatrouhSection'
-import DayTrips      from './components/DayTrips'
-import Testimonials  from './components/Testimonials'
+import DayTrips       from './components/DayTrips'
+import Testimonials   from './components/Testimonials'
 import { CTASection, Footer } from './components/CTAFooter'
-import BookingModal  from './components/BookingModal'
+import BookingModal   from './components/BookingModal'
+
+// ── عرض العين السخنة (تمت إضافته ليظهر في أفضل عروض الصيف) ──
+const SOKHNA_OFFER = {
+  id: "sokhna-lo2lo2a-offer",
+  title: "رحلة العين السخنة - قرية اللؤلؤة",
+  price_per_person: 400,
+  dest_name: "العين السخنة",
+  type: "package", 
+  date: "الإثنين 7 / 6",
+  description: "يوم كامل على البحر في شاطئ تابع للقوات المسلحة (أمان ونظافة تامّة).",
+  // صورة معبرة عن البحر تناسب الستايل
+  image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+  features: ["باصات سياحية مكيفة", "شاطئ عائلي محترم", "شامل الانتقالات"],
+  badge: "أفضل عروض الصيف 🔥"
+};
 
 export default function App() {
   const [destinations, setDestinations] = useState([])
@@ -51,14 +66,18 @@ export default function App() {
           .eq('available', true)
           .order('created_at', { ascending: false })
         if (error || !data?.length) throw error
+        
         // normalise dest_name
         const normalised = data.map(p => ({
           ...p,
           dest_name: p.destinations?.name || p.dest_name || '',
         }))
-        setPackages(normalised)
+        
+        // دمج عرض السخنة ليكون في مقدمة الباقات
+        setPackages([SOKHNA_OFFER, ...normalised])
       } catch {
-        setPackages(DEMO_PACKAGES)
+        // إضافة العرض للداتا التجريبية في حالة عدم الاتصال
+        setPackages([SOKHNA_OFFER, ...DEMO_PACKAGES])
       } finally {
         setLoadingPkgs(false)
       }
@@ -105,6 +124,7 @@ export default function App() {
         onBook={openModal}
       />
 
+      {/* قسم العروض الذي سيظهر فيه عرض السخنة */}
       <Packages
         packages={packages}
         loading={loadingPkgs}
